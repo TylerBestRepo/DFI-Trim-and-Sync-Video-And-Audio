@@ -6,6 +6,10 @@ import glob
 import csv
 import time,datetime
 import math
+from tkinter import Tk
+from tkinter import messagebox
+from tkinter.filedialog import askopenfilename
+import time
 
 # Functions
 
@@ -117,14 +121,29 @@ print(cutoff_1_string, no_cutoff_1)
 print(cutoff_2_string, no_cutoff_2)
 
 
-# dont want exact start time we need to know how much to trim off
-#shell_command_1 = "ffmpeg -ss " + string_new_face_start + " -i " + list_of_files[0] + " -c copy NewFaceStart.mp4"
+# Close to editing any two of the three files to make a good sync
+Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
+messagebox.showinfo("Ahoy", "Select the face frame video file")
+face_vid_path = askopenfilename() # show an "Open" dialog box and return the path to the selected file
+messagebox.showinfo("Ahoy", "Select the forward frame video file")
+forward_vid_path = askopenfilename() # show an "Open" dialog box and return the path to the selected file
+messagebox.showinfo("Ahoy", "Select the audio file")
+audio_file_path = askopenfilename() # show an "Open" dialog box and return the path to the selected file
+
+face_vid = os.path.basename(face_vid_path)
+#forward_vid = os.path.basename(forward_vid_path)
+#audio = os.path.basename(audio_file_path)
+print(face_vid)
+
+# The subject file from this will be dependant of if checks to do the right one
+shell_command_1 = "ffmpeg -ss " + cutoff_1_string + " -i " + face_vid + " -c copy " + face_vid + "Synced.mp4"
 
 
 
-#print(shell_command)
-
-#os.system(shell_command_1)
+print(shell_command_1)
+start_time = time.time()
+os.system(shell_command_1)
+print("My program took", round(time.time() - start_time,3), "to run")
 
 
 
