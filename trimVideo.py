@@ -65,104 +65,145 @@ for file in glob.glob("*.MP4"):
     list_of_files.append(file)
 
 print(list_of_files)
-# Looking for .mp4 files
-for file in glob.glob("*.txt"):
-    timesFile = file
+
+#getting the phone txt file
+messagebox.showinfo("Ahoy", "Select the phone text file")
+timesFile = askopenfilename()
+
 times = []
 # Getting the input times from the smartphone text file
 with open(timesFile) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
-            times.append(row[1])
+            if (row[0] == 'Video started at'):
+                times.append(row)
+            elif (row[0] == 'Forward video started at'):
+                times.append(row)
+            elif (row[0] == 'Audio started at'):
+                times.append(row)
+
+# For testing i hard code the 
 
 # Converting to date time varibales from strings
-faceFacing = datetime.datetime.strptime(times[0], "%H:%M:%S")
-forwardFacing = datetime.datetime.strptime(times[1], "%H:%M:%S")
-audioTime = datetime.datetime.strptime(times[2], "%H:%M:%S")
+bool_check = []
+for x in times:
+    if x[0] == 'Video started at':
+        faceFacing = datetime.datetime.strptime(x[1], "%H:%M:%S")
+        bool_check.append(True)
+    elif x[0] == 'Forward video started at':
+        forwardFacing = datetime.datetime.strptime(x[1], "%H:%M:%S")
+        bool_check.append(True)
+    elif x[0] == 'Audio started at':
+        temp = x[1]
+        audioTime = datetime.datetime.strptime(x[1], "%H:%M:%S")
+        bool_check.append(True)
 
-# Now datetimes can be converted to unix times
-faceFacing = (time.mktime(faceFacing.timetuple()))
-forwardFacing = (time.mktime(forwardFacing.timetuple()))
-audioTime = (time.mktime(audioTime.timetuple()))
+all_reference_times_exist = True
+counter = 0
+for x in bool_check:
+    if x == True:
+        counter += 1
+if counter != 3:
+    all_reference_times_exist = False
 
-unix_vals = [["Face facing",faceFacing], ["Forward facing", forwardFacing], ["audio time", audioTime]]
+if all_reference_times_exist:
+    # Now datetimes can be converted to unix times
+    faceFacing = (time.mktime(faceFacing.timetuple()))
+    forwardFacing = (time.mktime(forwardFacing.timetuple()))
+    audioTime = (time.mktime(audioTime.timetuple()))
 
-print(f"Unix values unsorted: {unix_vals}")
+    unix_vals = [["Face facing",faceFacing], ["Forward facing", forwardFacing], ["audio time", audioTime]]
 
-i = 0
-y = len(unix_vals)
-biggest = unix_vals[0][1]
-index = 0
-while i < y:
-    if unix_vals[i][1] == biggest:
-        print("Good to know")
-    elif unix_vals[i][1] > biggest:
-        biggest = unix_vals[i][1]
-        index = i
-    i += 1
-# Biggest is the latest startig times unix value, index is relative to the original unix_vals list and the string will also be written
-print(biggest, index)
-biggest_name = unix_vals[index][0]
+    print(f"Unix values unsorted: {unix_vals}")
 
-del unix_vals[index]
-unix_times_used_to_cut_vid_or_audio = unix_vals
-print(unix_times_used_to_cut_vid_or_audio)
+    i = 0
+    y = len(unix_vals)
+    biggest = unix_vals[0][1]
+    index = 0
+    while i < y:
+        if unix_vals[i][1] == biggest:
+            print("Good to know")
+        elif unix_vals[i][1] > biggest:
+            biggest = unix_vals[i][1]
+            index = i
+        i += 1
+    # Biggest is the latest startig times unix value, index is relative to the original unix_vals list and the string will also be written
+    print(biggest, index)
+    biggest_name = unix_vals[index][0]
 
-# only a maxiumum of two out of three files will need to be trimmed
-cutoff_1 = unix_times_used_to_cut_vid_or_audio[0][1] - biggest
-cutoff_2 = unix_times_used_to_cut_vid_or_audio[1][1] - biggest
+    del unix_vals[index]
+    unix_times_used_to_cut_vid_or_audio = unix_vals
+    print(unix_times_used_to_cut_vid_or_audio)
 
-
-
-# Calling function to generate a string in the format 00:00:30 if the first 30 seconds of video needs to be cut off
-cutoff_1_string, no_cutoff_1 = calc_starting_time(cutoff_1)
-cutoff_2_string, no_cutoff_2 = calc_starting_time(cutoff_2)
-print(cutoff_1_string, no_cutoff_1) 
-print(cutoff_2_string, no_cutoff_2)
-
-
-# Close to editing any two of the three files to make a good sync
-Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
-messagebox.showinfo("Ahoy", "Select the face frame video file")
-face_vid_path = askopenfilename() # show an "Open" dialog box and return the path to the selected file
-messagebox.showinfo("Ahoy", "Select the forward frame video file")
-forward_vid_path = askopenfilename() # show an "Open" dialog box and return the path to the selected file
-messagebox.showinfo("Ahoy", "Select the audio file")
-audio_file_path = askopenfilename() # show an "Open" dialog box and return the path to the selected file
-
-face_vid = os.path.basename(face_vid_path)
-#forward_vid = os.path.basename(forward_vid_path)
-#audio = os.path.basename(audio_file_path)
-print(face_vid)
-
-# The subject file from this will be dependant of if checks to do the right one
-shell_command_1 = "ffmpeg -ss " + cutoff_1_string + " -i " + face_vid + " -c copy " + face_vid + "Synced.mp4"
+    # only a maxiumum of two out of three files will need to be trimmed
+    cutoff_1 = unix_times_used_to_cut_vid_or_audio[0][1] - biggest
+    cutoff_2 = unix_times_used_to_cut_vid_or_audio[1][1] - biggest
 
 
 
-print(shell_command_1)
-start_time = time.time()
-os.system(shell_command_1)
-print("My program took", round(time.time() - start_time,3), "to run")
+    # Calling function to generate a string in the format 00:00:30 if the first 30 seconds of video needs to be cut off
+    cutoff_1_string, no_cutoff_1 = calc_starting_time(cutoff_1)
+    cutoff_2_string, no_cutoff_2 = calc_starting_time(cutoff_2)
+    print(cutoff_1_string, no_cutoff_1) 
+    print(cutoff_2_string, no_cutoff_2)
+
+
+    # Close to editing any two of the three files to make a good sync
+    Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
+    messagebox.showinfo("Ahoy", "Select the face frame video file")
+    face_vid_path = askopenfilename() # show an "Open" dialog box and return the path to the selected file
+    # messagebox.showinfo("Ahoy", "Select the forward frame video file")
+    # forward_vid_path = askopenfilename() # show an "Open" dialog box and return the path to the selected file
+    messagebox.showinfo("Ahoy", "Select the audio file")
+    audio_file_path = askopenfilename() # show an "Open" dialog box and return the path to the selected file
+
+    face_vid = os.path.basename(face_vid_path)
+    # forward_vid = os.path.basename(forward_vid_path)
+    audio = os.path.basename(audio_file_path)
+    print(face_vid)
+
+    # The subject file from this will be dependant of if checks to do the right one
+
+    if (unix_times_used_to_cut_vid_or_audio[0][0] == "Face facing"):
+        shell_command_1 = "ffmpeg -ss " + cutoff_1_string + " -i " + face_vid + " -c copy " + face_vid[:-4] + "Synced.mp4"
+    elif (unix_times_used_to_cut_vid_or_audio[0][0] == "Forward facing"):
+        shell_command_1 = "ffmpeg -ss " + cutoff_1_string + " -i " + forward_vid + " -c copy " + forward_vid[:-4]  + "Synced.mp4"
+    elif (unix_times_used_to_cut_vid_or_audio[0][0] == "audio time"):
+        shell_command_1 = "ffmpeg -ss " + cutoff_1_string + " -i " + audio + " -c copy " + audio[:-4]  + "Synced.mp4"
+
+    if (unix_times_used_to_cut_vid_or_audio[1][0] == "Face facing"):
+        shell_command_2 = "ffmpeg -ss " + cutoff_2_string + " -i " + face_vid + " -c copy " + face_vid[:-4]  + "Synced.mp4"
+    elif (unix_times_used_to_cut_vid_or_audio[1][0] == "Forward facing"):
+        shell_command_2 = "ffmpeg -ss " + cutoff_2_string + " -i " + forward_vid + " -c copy " + forward_vid[:-4]  + "Synced.mp4"
+    elif (unix_times_used_to_cut_vid_or_audio[1][0] == "audio time"):
+        shell_command_2 = "ffmpeg -ss " + cutoff_2_string + " -i " + audio + " -c copy " + audio[:-4]  + "Synced.mp4"
+
+    shell_command_1 = "ffmpeg -ss " + cutoff_1_string + " -i " + face_vid + " -c copy " + face_vid[:-4]  + "Synced.mp4"
 
 
 
+    print(shell_command_1)
+    start_time = time.time()
+    os.system(shell_command_1)
+    print("My program took", round(time.time() - start_time,3), "to run")
 
 
 
+    # This is just for printing to see what was happening and or with the times for use later
 
-# This is just for printing to see what was happening and or with the times for use later
+    # Printing the time differences between the face facing cam and the audio start
+    if (cutoff_1 < 0 ):
+        print(f"Time diff 1 is {abs(cutoff_1)} seconds before the latest starting recording")
+        #This part here seems all good
 
-# Printing the time differences between the face facing cam and the audio start
-if (cutoff_1 < 0 ):
-    print(f"Time diff 1 is {abs(cutoff_1)} seconds before the latest starting recording")
-    #This part here seems all good
+    # Printing the time differences between the forward facing cam and the audio start
+    #time_diff_forward_audio = forwardFacing - audioTime
+    if (cutoff_2 < 0):
+            print(f"Time diff 2 is {abs(cutoff_2)} seconds before the latest starting recording")
 
-# Printing the time differences between the forward facing cam and the audio start
-#time_diff_forward_audio = forwardFacing - audioTime
-if (cutoff_2 < 0):
-        print(f"Time diff 2 is {abs(cutoff_2)} seconds before the latest starting recording")
+    print(f"The latest started recording is: {biggest_name}")
 
-print(f"The latest started recording is: {biggest_name}")
+else:
+    print("The input text file doesnt contain the 3 necessary time stamps for syncing")
 
 #print(f"Face start = {time_diff_face_audio}\nForward Start = {time_diff_forward_audio}")
