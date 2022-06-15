@@ -30,7 +30,11 @@ with open ('concatenationTXT.txt', 'w') as f:
     for item in files_list:
         writer.writerow([item])
     
-shell_command = "ffmpeg -f concat -safe 0 -i concatenationTXT.txt -c copy betterOuputName.MP4"
+
+# This method works well and fast and doesnt re-encode and works properly so long as the file extensions/types are the same going into this.
+shell_command = "ffmpeg -f concat -safe 0 -i concatenationTXT.txt -c copy" + files_list[0] +  ".MP4"
+
+
 
 if (files_list != []):
     os.system(shell_command)

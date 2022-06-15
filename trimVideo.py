@@ -152,56 +152,58 @@ if all_reference_times_exist:
     Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
     messagebox.showinfo("Ahoy", "Select the face frame video file")
     face_vid_path = askopenfilename() # show an "Open" dialog box and return the path to the selected file
-    # messagebox.showinfo("Ahoy", "Select the forward frame video file")
-    # forward_vid_path = askopenfilename() # show an "Open" dialog box and return the path to the selected file
+    messagebox.showinfo("Ahoy", "Select the forward frame video file")
+    forward_vid_path = askopenfilename() # show an "Open" dialog box and return the path to the selected file
     messagebox.showinfo("Ahoy", "Select the audio file")
     audio_file_path = askopenfilename() # show an "Open" dialog box and return the path to the selected file
 
     face_vid = os.path.basename(face_vid_path)
-    # forward_vid = os.path.basename(forward_vid_path)
+    forward_vid = os.path.basename(forward_vid_path)
     audio = os.path.basename(audio_file_path)
     print(face_vid)
 
     # The subject file from this will be dependant of if checks to do the right one
 
     if (unix_times_used_to_cut_vid_or_audio[0][0] == "Face facing"):
-        shell_command_1 = "ffmpeg -ss " + cutoff_1_string + " -i " + face_vid + " -c copy " + face_vid[:-4] + "Synced.mp4"
+        shell_command_1 = "ffmpeg -ss " + cutoff_1_string + " -i " + face_vid + " -c copy output/" + face_vid[:-4] + "Synced.mp4"
     elif (unix_times_used_to_cut_vid_or_audio[0][0] == "Forward facing"):
-        shell_command_1 = "ffmpeg -ss " + cutoff_1_string + " -i " + forward_vid + " -c copy " + forward_vid[:-4]  + "Synced.mp4"
+        shell_command_1 = "ffmpeg -ss " + cutoff_1_string + " -i " + forward_vid + " -c copy output/" + forward_vid[:-4]  + "Synced.mp4"
     elif (unix_times_used_to_cut_vid_or_audio[0][0] == "audio time"):
-        shell_command_1 = "ffmpeg -ss " + cutoff_1_string + " -i " + audio + " -c copy " + audio[:-4]  + "Synced.mp4"
+        shell_command_1 = "ffmpeg -ss " + cutoff_1_string + " -i " + audio + " -c copy output/" + audio[:-4]  + "Synced.mp4"
 
     if (unix_times_used_to_cut_vid_or_audio[1][0] == "Face facing"):
-        shell_command_2 = "ffmpeg -ss " + cutoff_2_string + " -i " + face_vid + " -c copy " + face_vid[:-4]  + "Synced.mp4"
+        shell_command_2 = "ffmpeg -ss " + cutoff_2_string + " -i " + face_vid + " -c copy output/" + face_vid[:-4]  + "Synced.mp4"
     elif (unix_times_used_to_cut_vid_or_audio[1][0] == "Forward facing"):
-        shell_command_2 = "ffmpeg -ss " + cutoff_2_string + " -i " + forward_vid + " -c copy " + forward_vid[:-4]  + "Synced.mp4"
+        shell_command_2 = "ffmpeg -ss " + cutoff_2_string + " -i " + forward_vid + " -c copy output/" + forward_vid[:-4]  + "Synced.mp4"
     elif (unix_times_used_to_cut_vid_or_audio[1][0] == "audio time"):
-        shell_command_2 = "ffmpeg -ss " + cutoff_2_string + " -i " + audio + " -c copy " + audio[:-4]  + "Synced.mp4"
+        shell_command_2 = "ffmpeg -ss " + cutoff_2_string + " -i " + audio + " -c copy output/" + audio[:-4]  + "Synced.wav"
 
-    shell_command_1 = "ffmpeg -ss " + cutoff_1_string + " -i " + face_vid + " -c copy " + face_vid[:-4]  + "Synced.mp4"
 
 
 
     print(shell_command_1)
     start_time = time.time()
     os.system(shell_command_1)
-    print("My program took", round(time.time() - start_time,3), "to run")
-
+    print("My program took", round(time.time() - start_time,3), "to run 1st trimming")
+    print(shell_command_2)
+    start_time_2 = time.time()
+    os.system(shell_command_2)
+    print("My program took", round(time.time() - start_time_2,3), "to run second trimming")
 
 
     # This is just for printing to see what was happening and or with the times for use later
 
     # Printing the time differences between the face facing cam and the audio start
-    if (cutoff_1 < 0 ):
-        print(f"Time diff 1 is {abs(cutoff_1)} seconds before the latest starting recording")
-        #This part here seems all good
+    # if (cutoff_1 < 0 ):
+    #     print(f"Time diff 1 is {abs(cutoff_1)} seconds before the latest starting recording")
+    #     #This part here seems all good
 
-    # Printing the time differences between the forward facing cam and the audio start
-    #time_diff_forward_audio = forwardFacing - audioTime
-    if (cutoff_2 < 0):
-            print(f"Time diff 2 is {abs(cutoff_2)} seconds before the latest starting recording")
+    # # Printing the time differences between the forward facing cam and the audio start
+    # #time_diff_forward_audio = forwardFacing - audioTime
+    # if (cutoff_2 < 0):
+    #         print(f"Time diff 2 is {abs(cutoff_2)} seconds before the latest starting recording")
 
-    print(f"The latest started recording is: {biggest_name}")
+    # print(f"The latest started recording is: {biggest_name}")
 
 else:
     print("The input text file doesnt contain the 3 necessary time stamps for syncing")
